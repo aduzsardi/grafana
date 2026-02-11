@@ -1720,4 +1720,8 @@ export interface FeatureToggles {
   * @default false
   */
   colorblindThemes?: boolean;
+  /**
+  * Enables heatmap visualization support for Pyroscope profiles
+  */
+  profilesHeatmap?: boolean;
 }

@@ -2729,6 +2729,13 @@ var (
 			RequiresRestart: true,
 			Expression:      "false",
 		},
+		{
+			Name:         "profilesHeatmap",
+			Description:  "Enables heatmap visualization support for Pyroscope profiles",
+			Stage:        FeatureStageExperimental,
+			Owner:        grafanaObservabilityTracesAndProfilingSquad,
+			FrontendOnly: false,
+		},
 	}
 )
 
