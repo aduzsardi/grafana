@@ -35,6 +35,7 @@ func (g *lazyClientGenerator) GetCustomRouteClient(gv schema.GroupVersion, defau
 	if err := g.init(); err != nil {
 		return nil, err
 	}
+
 	return g.clientGenerator.GetCustomRouteClient(gv, defaultNamespace)
 }
 
