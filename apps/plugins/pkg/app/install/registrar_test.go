@@ -284,6 +284,10 @@ func (f *fakeClientGenerator) ClientFor(resource.Kind) (resource.Client, error) 
 	return &fakeResourceClient{client: f.client}, nil
 }
 
+func (f *fakeClientGenerator) GetCustomRouteClient(gv schema.GroupVersion, defaultNamespace string) (resource.CustomRouteClient, error) {
+	return nil, errors.New("unimplemented")
+}
+
 type fakeResourceClient struct {
 	client *fakePluginInstallClient
 }
