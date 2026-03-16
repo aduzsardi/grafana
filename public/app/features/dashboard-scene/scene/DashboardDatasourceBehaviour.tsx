@@ -116,10 +116,11 @@ export class DashboardDatasourceBehaviour extends SceneObjectBase<DashboardDatas
 
       // Only re-run if there's actually new data to process.
       // This prevents re-running when the source panel is cancelled, which only changes
-      // the loading state but keeps the same requestId.
+      // the loading state but keeps the same requestId and identical series/annotations.
       // We trigger when:
       // 1. requestId changed (new query completed)
       // 2. isStreaming (continuous data updates)
+      // 3. series or annotations references changed (e.g. transformation reprocessing)
       const onSourceDataChange = (
         newState: { data?: typeof sourcePanelQueryRunner.state.data },
         oldState: { data?: typeof sourcePanelQueryRunner.state.data }
@@ -128,7 +129,10 @@ export class DashboardDatasourceBehaviour extends SceneObjectBase<DashboardDatas
         const oldRequestId = oldState.data?.request?.requestId;
         const hasNewRequest = newRequestId !== oldRequestId;
         const isStreaming = newState.data?.state === LoadingState.Streaming;
-        if (newState.data !== oldState.data && (hasNewRequest || isStreaming)) {
+        const hasNewData =
+          newState.data?.series !== oldState.data?.series ||
+          newState.data?.annotations !== oldState.data?.annotations;
+        if (newState.data !== oldState.data && (hasNewRequest || isStreaming || hasNewData)) {
           queryRunner.runQueries();
         }
       };
