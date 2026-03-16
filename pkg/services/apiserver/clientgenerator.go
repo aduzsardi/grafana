@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/grafana-app-sdk/k8s"
 	"github.com/grafana/grafana-app-sdk/resource"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // ProvideClientGenerator creates a lazy-initialized ClientGenerator.
@@ -38,4 +39,22 @@ func (g *lazyClientGenerator) ClientFor(kind resource.Kind) (resource.Client, er
 	}
 
 	return g.clientGenerator.ClientFor(kind)
+}
+
+func (g *lazyClientGenerator) GetCustomRouteClient(gv schema.GroupVersion, defaultNamespace string) (resource.CustomRouteClient, error) {
+	g.initOnce.Do(func() {
+		restConfig, err := g.restConfigProvider.GetRestConfig(context.Background())
+		if err != nil {
+			g.initError = err
+			return
+		}
+		restConfig.APIPath = "apis"
+		g.clientGenerator = k8s.NewClientRegistry(*restConfig, k8s.DefaultClientConfig())
+	})
+
+	if g.initError != nil {
+		return nil, g.initError
+	}
+
+	return g.clientGenerator.GetCustomRouteClient(gv, defaultNamespace)
 }
