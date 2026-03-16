@@ -24,24 +24,21 @@ type lazyClientGenerator struct {
 }
 
 func (g *lazyClientGenerator) ClientFor(kind resource.Kind) (resource.Client, error) {
-	g.initOnce.Do(func() {
-		restConfig, err := g.restConfigProvider.GetRestConfig(context.Background())
-		if err != nil {
-			g.initError = err
-			return
-		}
-		restConfig.APIPath = "apis"
-		g.clientGenerator = k8s.NewClientRegistry(*restConfig, k8s.DefaultClientConfig())
-	})
-
-	if g.initError != nil {
-		return nil, g.initError
+	if err := g.init(); err != nil {
+		return nil, err
 	}
 
 	return g.clientGenerator.ClientFor(kind)
 }
 
 func (g *lazyClientGenerator) GetCustomRouteClient(gv schema.GroupVersion, defaultNamespace string) (resource.CustomRouteClient, error) {
+	if err := g.init(); err != nil {
+		return nil, err
+	}
+	return g.clientGenerator.GetCustomRouteClient(gv, defaultNamespace)
+}
+
+func (g *lazyClientGenerator) init() error {
 	g.initOnce.Do(func() {
 		restConfig, err := g.restConfigProvider.GetRestConfig(context.Background())
 		if err != nil {
@@ -52,9 +49,5 @@ func (g *lazyClientGenerator) GetCustomRouteClient(gv schema.GroupVersion, defau
 		g.clientGenerator = k8s.NewClientRegistry(*restConfig, k8s.DefaultClientConfig())
 	})
 
-	if g.initError != nil {
-		return nil, g.initError
-	}
-
-	return g.clientGenerator.GetCustomRouteClient(gv, defaultNamespace)
+	return g.initError
 }
