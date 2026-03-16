@@ -2888,7 +2888,40 @@ func TestService_BatchCheck(t *testing.T) {
 			},
 		},
 		{
-			name: "should error on unknown subresource in batch",
+			name: "should grant annotation read via dashboards:view action set",
+			req: &authzv1.BatchCheckRequest{
+				Namespace: "org-12",
+				Subject:   "user:test-uid",
+				Checks: []*authzv1.BatchCheckItem{
+					{
+						CorrelationId: "check_anno_read",
+						Group:         "dashboard.grafana.app",
+						Resource:      "dashboards",
+						Subresource:   "annotations",
+						Verb:          "get",
+						Name:          "dash1",
+					},
+					{
+						CorrelationId: "check_anno_create",
+						Group:         "dashboard.grafana.app",
+						Resource:      "dashboards",
+						Subresource:   "annotations",
+						Verb:          "create",
+						Name:          "dash1",
+					},
+				},
+			},
+			permissions: []accesscontrol.Permission{
+				// dashboards:view action set grants read but not write
+				{Action: "dashboards:view", Scope: "dashboards:uid:dash1"},
+			},
+			expected: map[string]bool{
+				"check_anno_read":   true,
+				"check_anno_create": false,
+			},
+		},
+		{
+			name: "should deny unknown subresource via K8s-native fallback without error",
 			req: &authzv1.BatchCheckRequest{
 				Namespace: "org-12",
 				Subject:   "user:test-uid",
@@ -2901,7 +2934,7 @@ func TestService_BatchCheck(t *testing.T) {
 						Name:          "dash1",
 					},
 					{
-						CorrelationId: "check_invalid",
+						CorrelationId: "check_unknown_sub",
 						Group:         "dashboard.grafana.app",
 						Resource:      "dashboards",
 						Subresource:   "nonexistent",
@@ -2914,10 +2947,8 @@ func TestService_BatchCheck(t *testing.T) {
 				{Action: "dashboards:read", Scope: "dashboards:uid:dash1"},
 			},
 			expected: map[string]bool{
-				"check_valid": true,
-			},
-			expectErr: map[string]bool{
-				"check_invalid": true,
+				"check_valid":       true,
+				"check_unknown_sub": false, // denied via K8s-native fallback, no error
 			},
 		},
 	}

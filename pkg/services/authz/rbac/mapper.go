@@ -253,6 +253,16 @@ func NewMapperRegistry() MapperRegistry {
 					utils.VerbPatch:  "annotations:write",
 					utils.VerbDelete: "annotations:delete",
 				},
+				// Mirror dashboard action sets so managed roles like "dashboards:view" also grant annotations:read.
+				actionSetMapping: map[string][]string{
+					utils.VerbGet:    {"dashboards:view", "folders:view", "dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbList:   {"dashboards:view", "folders:view", "dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbWatch:  {"dashboards:view", "folders:view", "dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbCreate: {"dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbUpdate: {"dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbPatch:  {"dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+					utils.VerbDelete: {"dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"},
+				},
 				folderSupport: true,
 			},
 		},

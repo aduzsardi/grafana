@@ -186,6 +186,36 @@ func TestMapper_AnnotationSubresource_Scope(t *testing.T) {
 	})
 }
 
+// TestMapper_AnnotationSubresource_ActionSets verifies that managed roles (dashboards:view etc.)
+// flow through to annotation verbs via the subresource action set mapping.
+func TestMapper_AnnotationSubresource_ActionSets(t *testing.T) {
+	mapper := NewMapperRegistry()
+	mapping, ok := mapper.Get("dashboard.grafana.app", "dashboards/annotations")
+	require.True(t, ok)
+
+	readActionSets := []string{"dashboards:view", "folders:view", "dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"}
+	writeActionSets := []string{"dashboards:edit", "folders:edit", "dashboards:admin", "folders:admin"}
+
+	tests := []struct {
+		verb     string
+		expected []string
+	}{
+		{utils.VerbGet, readActionSets},
+		{utils.VerbList, readActionSets},
+		{utils.VerbWatch, readActionSets},
+		{utils.VerbCreate, writeActionSets},
+		{utils.VerbUpdate, writeActionSets},
+		{utils.VerbPatch, writeActionSets},
+		{utils.VerbDelete, writeActionSets},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.verb, func(t *testing.T) {
+			assert.ElementsMatch(t, tt.expected, mapping.ActionSets(tt.verb))
+		})
+	}
+}
+
 // TestService_AnnotationSubresource_ScopeHandling tests that annotation permissions use dashboard scope
 func TestService_AnnotationSubresource_ScopeHandling(t *testing.T) {
 	tests := []struct {
