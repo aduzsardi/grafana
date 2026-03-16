@@ -145,6 +145,57 @@ describe('VersionsEditView', () => {
       expect(versionsView.versions.find((rev) => rev.version === 1)).toBeUndefined();
       expect(versionsView.continueToken).toBe('');
     });
+
+    it('should allow loading more when fewer items than limit are returned but continueToken exists', async () => {
+      mockListDashboardHistory.mockResolvedValueOnce({
+        metadata: { continue: 'next-page-token', resourceVersion: '1' },
+        items: [createTestResource(4, '2017-02-22T17:43:01-08:00'), createTestResource(3, '2017-02-22T17:43:01-08:00')],
+      });
+
+      versionsView.reset();
+      versionsView.fetchVersions();
+      await new Promise(process.nextTick);
+
+      expect(versionsView.versions).toHaveLength(2);
+      expect(versionsView.continueToken).toBe('next-page-token');
+    });
+  });
+
+  describe('Pagination with page size limits', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show enabled "Show more" button when fewer items than limit but continueToken exists', async () => {
+      mockListDashboardHistory.mockResolvedValue({
+        metadata: { continue: 'next-page-token', resourceVersion: '1' },
+        items: [createTestResource(4, '2017-02-22T17:43:01-08:00'), createTestResource(3, '2017-02-22T17:43:01-08:00')],
+      });
+
+      mockUseGetDisplayMappingQuery.mockReturnValue({ data: undefined });
+
+      const { versionsView } = await buildTestScene();
+      render(<versionsView.Component model={versionsView} />);
+
+      const showMoreButton = await screen.findByText('Show more versions');
+      expect(showMoreButton).toBeInTheDocument();
+      expect(showMoreButton.closest('button')).not.toBeDisabled();
+    });
+
+    it('should not show "Show more" button when fewer items than limit and no continueToken', async () => {
+      mockListDashboardHistory.mockResolvedValue({
+        metadata: { continue: '', resourceVersion: '1' },
+        items: [createTestResource(4, '2017-02-22T17:43:01-08:00'), createTestResource(3, '2017-02-22T17:43:01-08:00')],
+      });
+
+      mockUseGetDisplayMappingQuery.mockReturnValue({ data: undefined });
+
+      const { versionsView } = await buildTestScene();
+      render(<versionsView.Component model={versionsView} />);
+
+      await screen.findByRole('table');
+      expect(screen.queryByText('Show more versions')).not.toBeInTheDocument();
+    });
   });
 
   describe('Display name resolution', () => {

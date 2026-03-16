@@ -114,11 +114,7 @@ export class VersionsSettings extends PureComponent<Props, State> {
     }));
 
   isLastPage() {
-    return (
-      this.state.versions.find((rev) => rev.version === 1) ||
-      this.state.versions.length % VERSIONS_FETCH_LIMIT !== 0 ||
-      this.continueToken === ''
-    );
+    return this.state.versions.find((rev) => rev.version === 1) || this.continueToken === '';
   }
 
   onCheck = (ev: React.FormEvent<HTMLInputElement>, versionId: number) => {
@@ -145,7 +141,7 @@ export class VersionsSettings extends PureComponent<Props, State> {
     const { versions, viewMode, baseInfo, newInfo, isNewLatest, isLoading, diffData } = this.state;
     const canCompare = versions.filter((version) => version.checked).length === 2;
     const showButtons = versions.length > 1;
-    const hasMore = versions.length >= VERSIONS_FETCH_LIMIT;
+    const hasMore = versions.length >= VERSIONS_FETCH_LIMIT || this.continueToken !== '';
     const pageNav = this.props.sectionNav.node.parentItem;
 
     if (viewMode === 'compare') {
