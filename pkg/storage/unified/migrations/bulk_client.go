@@ -3,8 +3,20 @@ package migrations
 import (
 	"fmt"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/grafana/grafana/pkg/storage/unified/resourcepb"
 )
+
+// errBatchedStreamUnimplemented is returned when the server does not support
+// BulkProcessBatched. The caller should retry using the legacy BulkProcess RPC.
+type errBatchedStreamUnimplemented struct{ cause error }
+
+func (e *errBatchedStreamUnimplemented) Error() string {
+	return fmt.Sprintf("BulkProcessBatched not supported by server: %v", e.cause)
+}
+func (e *errBatchedStreamUnimplemented) Unwrap() error { return e.cause }
 
 const (
 	defaultBulkProcessBatchMaxItems = 1000
@@ -68,7 +80,14 @@ func (c *bulkProcessBatchingClient) CloseAndRecv() (*resourcepb.BulkResponse, er
 		return nil, err
 	}
 
-	return c.BulkStore_BulkProcessBatchedClient.CloseAndRecv()
+	resp, err := c.BulkStore_BulkProcessBatchedClient.CloseAndRecv()
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return nil, &errBatchedStreamUnimplemented{cause: err}
+		}
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (c *bulkProcessBatchingClient) flush() error {
@@ -80,5 +99,11 @@ func (c *bulkProcessBatchingClient) flush() error {
 	c.batch = nil
 	c.batchSize = 0
 
-	return c.BulkStore_BulkProcessBatchedClient.Send(batch)
+	if err := c.BulkStore_BulkProcessBatchedClient.Send(batch); err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			return &errBatchedStreamUnimplemented{cause: err}
+		}
+		return err
+	}
+	return nil
 }

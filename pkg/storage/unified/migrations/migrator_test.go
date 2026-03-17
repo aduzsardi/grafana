@@ -528,34 +528,45 @@ func TestUnifiedMigration_Migrate_UsesCompatibleBulkProcessStream(t *testing.T) 
 	gr := schema.GroupResource{Group: "test.grafana.app", Resource: "tests"}
 
 	tests := []struct {
-		name           string
-		batchedErr     error
-		expectFallback bool
+		name                string
+		batchedErr          error // error from BulkProcessBatched stream creation
+		batchedStreamFailed bool  // true if stream CloseAndRecv returns Unimplemented
+		expectFallback      bool
 	}{
 		{
 			name: "uses batched stream when supported",
 		},
 		{
-			name:           "falls back to legacy stream when batched RPC is unavailable",
+			// Synchronous error at stream creation (e.g. inprocgrpc / service mesh).
+			name:           "falls back to legacy stream when batched RPC is unavailable at creation",
 			batchedErr:     status.Error(codes.Unimplemented, "rpc is not implemented"),
 			expectFallback: true,
+		},
+		{
+			// Real-world gRPC case: stream creation succeeds but the server's
+			// Unimplemented response arrives asynchronously and surfaces on CloseAndRecv.
+			name:                "falls back to legacy stream when batched stream fails mid-migration",
+			batchedStreamFailed: true,
+			expectFallback:      true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := resource.NewMockResourceClient(t)
-			batchedStream := &noopBulkProcessBatchedClient{}
 			legacyStream := &noopBulkProcessClient{}
 
-			var batchedResult resourcepb.BulkStore_BulkProcessBatchedClient
-			if tt.batchedErr == nil {
-				batchedResult = batchedStream
+			var batchedStream resourcepb.BulkStore_BulkProcessBatchedClient
+			switch {
+			case tt.batchedStreamFailed:
+				batchedStream = &bulkProcessBatchedClientThatFailsOnClose{}
+			case tt.batchedErr == nil:
+				batchedStream = &noopBulkProcessBatchedClient{}
 			}
 
 			mockClient.EXPECT().
 				BulkProcessBatched(mock.Anything).
-				Return(batchedResult, tt.batchedErr).
+				Return(batchedStream, tt.batchedErr).
 				Once()
 
 			if tt.expectFallback {
@@ -587,15 +598,11 @@ func TestUnifiedMigration_Migrate_UsesCompatibleBulkProcessStream(t *testing.T) 
 
 			require.NoError(t, err)
 			require.NotNil(t, resp)
-
 			if tt.expectFallback {
-				require.Equal(t, 0, batchedStream.sendCount)
 				require.Equal(t, 1, legacyStream.sendCount)
-				return
+			} else {
+				require.Equal(t, 0, legacyStream.sendCount)
 			}
-
-			require.Equal(t, 1, batchedStream.sendCount)
-			require.Equal(t, 0, legacyStream.sendCount)
 		})
 	}
 }
@@ -612,6 +619,20 @@ func (n *noopBulkProcessClient) Send(*resourcepb.BulkRequest) error {
 
 func (n *noopBulkProcessClient) CloseAndRecv() (*resourcepb.BulkResponse, error) {
 	return &resourcepb.BulkResponse{}, nil
+}
+
+// bulkProcessBatchedClientThatFailsOnClose simulates the real-world gRPC case where
+// stream creation succeeds but the server's Unimplemented response arrives asynchronously.
+type bulkProcessBatchedClientThatFailsOnClose struct {
+	grpc.ClientStream
+}
+
+func (c *bulkProcessBatchedClientThatFailsOnClose) Send(*resourcepb.BulkRequestBatch) error {
+	return nil
+}
+
+func (c *bulkProcessBatchedClientThatFailsOnClose) CloseAndRecv() (*resourcepb.BulkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "rpc is not implemented")
 }
 
 // noopBulkProcessBatchedClient is a minimal BulkStore_BulkProcessBatchedClient for testing.

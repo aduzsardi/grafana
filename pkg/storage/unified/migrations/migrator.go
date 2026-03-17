@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -45,6 +46,7 @@ type unifiedMigration struct {
 // streamProvider abstracts the different ways to create a bulk process stream
 type streamProvider interface {
 	createStream(ctx context.Context, opts MigrateOptions, registry *MigrationRegistry) (resourcepb.BulkStore_BulkProcessClient, error)
+	createLegacyStream(ctx context.Context, opts MigrateOptions, registry *MigrationRegistry) (resourcepb.BulkStore_BulkProcessClient, error)
 }
 
 func buildCollectionSettings(opts MigrateOptions, registry *MigrationRegistry) resource.BulkSettings {
@@ -73,6 +75,12 @@ func (r *resourceClientStreamProvider) createStream(ctx context.Context, opts Mi
 		return nil, err
 	}
 	return newBulkProcessBatchingClient(stream, defaultBulkProcessBatchOptions()), nil
+}
+
+func (r *resourceClientStreamProvider) createLegacyStream(ctx context.Context, opts MigrateOptions, registry *MigrationRegistry) (resourcepb.BulkStore_BulkProcessClient, error) {
+	settings := buildCollectionSettings(opts, registry)
+	ctx = metadata.NewOutgoingContext(ctx, settings.ToMD())
+	return r.client.BulkProcess(ctx)
 }
 
 // This can migrate Folders, Dashboards, LibraryPanels and Playlists
@@ -115,6 +123,15 @@ func (m *unifiedMigration) Migrate(ctx context.Context, opts MigrateOptions) (*r
 		return nil, fmt.Errorf("missing resource selector")
 	}
 
+	migratorFuncs := make([]MigratorFunc, 0, len(opts.Resources))
+	for _, res := range opts.Resources {
+		fn := m.registry.GetMigratorFunc(res)
+		if fn == nil {
+			return nil, fmt.Errorf("unsupported resource: %s/%s", res.Group, res.Resource)
+		}
+		migratorFuncs = append(migratorFuncs, fn)
+	}
+
 	// Use a cancellable context for the stream so that if a migration function
 	// fails, the server-side handler is notified and releases its bulk lock.
 	streamCtx, cancel := context.WithCancel(ctx)
@@ -125,25 +142,33 @@ func (m *unifiedMigration) Migrate(ctx context.Context, opts MigrateOptions) (*r
 		return nil, err
 	}
 
-	migratorFuncs := []MigratorFunc{}
-	for _, res := range opts.Resources {
-		fn := m.registry.GetMigratorFunc(res)
-		if fn == nil {
-			return nil, fmt.Errorf("unsupported resource: %s/%s", res.Group, res.Resource)
+	m.log.Info("start migrating legacy resources", "namespace", opts.Namespace, "orgId", info.OrgID, "stackId", info.StackID)
+	resp, err := m.runMigration(ctx, info.OrgID, opts, migratorFuncs, stream)
+	if errors.As(err, new(*errBatchedStreamUnimplemented)) {
+		// BulkProcessBatched was rejected mid-stream (server returned Unimplemented
+		// asynchronously). Retry from scratch using the legacy BulkProcess RPC.
+		m.log.Info("server does not support BulkProcessBatched, retrying with legacy BulkProcess", "namespace", opts.Namespace)
+		stream, err = m.streamProvider.createLegacyStream(streamCtx, opts, m.registry)
+		if err != nil {
+			return nil, err
 		}
-		migratorFuncs = append(migratorFuncs, fn)
+		resp, err = m.runMigration(ctx, info.OrgID, opts, migratorFuncs, stream)
+	}
+	if err != nil {
+		m.log.Error("error migrating legacy resources", "error", err, "namespace", opts.Namespace)
+		return nil, err
 	}
 
-	// Execute migrations
-	m.log.Info("start migrating legacy resources", "namespace", opts.Namespace, "orgId", info.OrgID, "stackId", info.StackID)
-	for _, fn := range migratorFuncs {
-		err := fn(ctx, info.OrgID, opts, stream)
-		if err != nil {
-			m.log.Error("error migrating legacy resources", "error", err, "namespace", opts.Namespace)
+	m.log.Info("finished migrating legacy resources", "namespace", opts.Namespace, "orgId", info.OrgID, "stackId", info.StackID)
+	return resp, nil
+}
+
+func (m *unifiedMigration) runMigration(ctx context.Context, orgID int64, opts MigrateOptions, fns []MigratorFunc, stream resourcepb.BulkStore_BulkProcessClient) (*resourcepb.BulkResponse, error) {
+	for _, fn := range fns {
+		if err := fn(ctx, orgID, opts, stream); err != nil {
 			return nil, err
 		}
 	}
-	m.log.Info("finished migrating legacy resources", "namespace", opts.Namespace, "orgId", info.OrgID, "stackId", info.StackID)
 	return stream.CloseAndRecv()
 }
 
