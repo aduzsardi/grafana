@@ -20,9 +20,11 @@ interface Props {
   searchQuery: string;
   listMode: OptionFilter;
   data?: PanelData;
+  /** When true, suppresses the styles/presets section (e.g. when it lives in a dedicated sidebar tab) */
+  skipStylesSection?: boolean;
 }
 
-export const PanelOptions = React.memo<Props>(({ panel, searchQuery, listMode, data }) => {
+export const PanelOptions = React.memo<Props>(({ panel, searchQuery, listMode, data, skipStylesSection }) => {
   const { options, fieldConfig, _pluginInstanceState } = panel.useState();
 
   const panelFrameOptions = useMemo(() => getPanelFrameOptions(panel), [panel]);
@@ -80,7 +82,7 @@ export const PanelOptions = React.memo<Props>(({ panel, searchQuery, listMode, d
       renderSearchHits(
         [
           panelFrameOptions,
-          ...(panelStylesOptions ? [panelStylesOptions] : []),
+          ...(!skipStylesSection && panelStylesOptions ? [panelStylesOptions] : []),
           ...(libraryPanelOptions ? [libraryPanelOptions] : []),
           ...(visualizationOptions ?? []),
         ],
@@ -96,7 +98,7 @@ export const PanelOptions = React.memo<Props>(({ panel, searchQuery, listMode, d
           mainBoxElements.push(libraryPanelOptions.renderElement());
         }
         mainBoxElements.push(panelFrameOptions.renderElement());
-        if (panelStylesOptions) {
+        if (!skipStylesSection && panelStylesOptions) {
           mainBoxElements.push(panelStylesOptions.renderElement());
         }
 

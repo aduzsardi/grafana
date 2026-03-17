@@ -1682,4 +1682,9 @@ export interface FeatureToggles {
   * @default false
   */
   colorblindThemes?: boolean;
+  /**
+  * PoC: Enable the vertical icon sidebar in the panel options pane
+  * @default false
+  */
+  vizOptionsSidebar?: boolean;
 }

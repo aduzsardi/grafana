@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useToggle } from 'react-use';
 
 import {
@@ -34,6 +34,8 @@ import { PanelOptions } from './PanelOptions';
 import { PanelVizTypePicker } from './PanelVizTypePicker';
 import { INTERACTION_EVENT_NAME, INTERACTION_ITEM } from './interaction';
 import { useScrollReflowLimit } from './useScrollReflowLimit';
+import { AiSectionPlaceholder, VizOptionsSidebar, VizSidebarSection } from './VizOptionsSidebar';
+import { StylesSection } from './VizStylesSection';
 
 export interface PanelOptionsPaneState extends SceneObjectState {
   isVizPickerOpen?: boolean;
@@ -156,6 +158,8 @@ function PanelOptionsPaneComponent({ model }: SceneComponentProps<PanelOptionsPa
   const [isSearchingOptions, setIsSearchingOptions] = useToggle(false);
   const onlyOverrides = listMode === OptionFilter.Overrides;
   const isScrollingLayout = useScrollReflowLimit();
+  const [activeSection, setActiveSection] = useState<VizSidebarSection>('options');
+  const isSidebarEnabled = Boolean(config.featureToggles.vizOptionsSidebar);
 
   const { value: listedPlugins = [] } = useListedPanelPluginMetas();
   const pluginMeta: PanelPluginMeta = useMemo(() => {
@@ -167,89 +171,132 @@ function PanelOptionsPaneComponent({ model }: SceneComponentProps<PanelOptionsPa
     return meta;
   }, [pluginId, listedPlugins]);
 
-  return (
+  if (isVizPickerOpen) {
+    return (
+      <PanelVizTypePicker
+        panel={panel}
+        onChange={model.onChangePanel}
+        onClose={model.onToggleVizPicker}
+        data={data}
+        showBackButton={config.featureToggles.newVizSuggestions ? hasPickedViz || !isNewPanel : true}
+        isNewPanel={isNewPanel}
+        hasPickedViz={hasPickedViz}
+      />
+    );
+  }
+
+  // Determine the scrollable content area based on active section (sidebar mode) or list mode (default mode)
+  const scrollableContent = (() => {
+    if (isSidebarEnabled) {
+      switch (activeSection) {
+        case 'ai':
+          return <AiSectionPlaceholder />;
+        case 'styles':
+          return <StylesSection panel={panel} data={data} />;
+        case 'overrides':
+          return (
+            <ScrollContainer minHeight={isScrollingLayout ? 'max-content' : 0}>
+              <PanelOptions panel={panel} searchQuery={searchQuery} listMode={OptionFilter.Overrides} data={data} />
+            </ScrollContainer>
+          );
+        default: // 'options'
+          return (
+            <ScrollContainer minHeight={isScrollingLayout ? 'max-content' : 0}>
+              <PanelOptions
+                panel={panel}
+                searchQuery={searchQuery}
+                listMode={OptionFilter.All}
+                data={data}
+                skipStylesSection
+              />
+            </ScrollContainer>
+          );
+      }
+    }
+    return (
+      <ScrollContainer minHeight={isScrollingLayout ? 'max-content' : 0}>
+        <PanelOptions panel={panel} searchQuery={searchQuery} listMode={listMode} data={data} />
+      </ScrollContainer>
+    );
+  })();
+
+  const paneContent = (
     <>
-      {!isVizPickerOpen && (
-        <>
-          <div className={styles.top}>
-            <Stack gap={1}>
-              <img alt={pluginMeta.name} src={pluginMeta.info.logos.small} className={styles.pluginIcon} />
-              <Text
-                data-testid={selectors.components.PanelEditor.OptionsPane.header}
-                element="h3"
-                variant="body"
-                weight="medium"
-                truncate
-              >
-                {pluginMeta.name}
-              </Text>
-              <Button
-                size="sm"
-                fill="text"
-                onClick={model.onToggleVizPicker}
-                data-testid={selectors.components.PanelEditor.toggleVizPicker}
-                aria-label={t(
-                  'dashboard-scene.visualization-button.aria-label-change-visualization',
-                  'Change visualization'
-                )}
-              >
-                <Trans i18nKey="dashboard-scene.visualization-button.text">Change</Trans>
-              </Button>
-            </Stack>
-            <Stack gap={1}>
-              {hasFieldConfig && (
-                <ToolbarButton
-                  icon="sliders-v-alt"
-                  tooltip={t('dashboard.panel-edit.only-overrides-button-tooltip', 'Show only overrides')}
-                  variant={onlyOverrides ? 'active' : 'canvas'}
-                  onClick={() => {
-                    model.onSetListMode(onlyOverrides ? OptionFilter.All : OptionFilter.Overrides);
-                  }}
-                  aria-pressed={onlyOverrides}
-                />
-              )}
-              <Button
-                icon="search"
-                variant="secondary"
-                onClick={setIsSearchingOptions}
-                tooltip={t('dashboard.panel-edit.visualization-button-tooltip', 'Search options')}
-              />
-            </Stack>
-          </div>
-          {isSearchingOptions && (
-            <div className={styles.searchWrapper}>
-              <FilterInput
-                className={styles.searchOptions}
-                value={searchQuery}
-                placeholder={t('dashboard.panel-edit.placeholder-search-options', 'Search options')}
-                onChange={model.onSetSearchQuery}
-                autoFocus={true}
-                onBlur={() => {
-                  if (searchQuery.length === 0) {
-                    setIsSearchingOptions(false);
-                  }
-                }}
-              />
-            </div>
+      <div className={styles.top}>
+        <Stack gap={1}>
+          <img alt={pluginMeta.name} src={pluginMeta.info.logos.small} className={styles.pluginIcon} />
+          <Text
+            data-testid={selectors.components.PanelEditor.OptionsPane.header}
+            element="h3"
+            variant="body"
+            weight="medium"
+            truncate
+          >
+            {pluginMeta.name}
+          </Text>
+          <Button
+            size="sm"
+            fill="text"
+            onClick={model.onToggleVizPicker}
+            data-testid={selectors.components.PanelEditor.toggleVizPicker}
+            aria-label={t(
+              'dashboard-scene.visualization-button.aria-label-change-visualization',
+              'Change visualization'
+            )}
+          >
+            <Trans i18nKey="dashboard-scene.visualization-button.text">Change</Trans>
+          </Button>
+        </Stack>
+        <Stack gap={1}>
+          {/* Hide overrides toggle in sidebar mode — overrides has a dedicated section in the rail */}
+          {hasFieldConfig && !isSidebarEnabled && (
+            <ToolbarButton
+              icon="sliders-v-alt"
+              tooltip={t('dashboard.panel-edit.only-overrides-button-tooltip', 'Show only overrides')}
+              variant={onlyOverrides ? 'active' : 'canvas'}
+              onClick={() => {
+                model.onSetListMode(onlyOverrides ? OptionFilter.All : OptionFilter.Overrides);
+              }}
+              aria-pressed={onlyOverrides}
+            />
           )}
-          <ScrollContainer minHeight={isScrollingLayout ? 'max-content' : 0}>
-            <PanelOptions panel={panel} searchQuery={searchQuery} listMode={listMode} data={data} />
-          </ScrollContainer>
-        </>
+          <Button
+            icon="search"
+            variant="secondary"
+            onClick={setIsSearchingOptions}
+            tooltip={t('dashboard.panel-edit.visualization-button-tooltip', 'Search options')}
+          />
+        </Stack>
+      </div>
+      {isSearchingOptions && (
+        <div className={styles.searchWrapper}>
+          <FilterInput
+            className={styles.searchOptions}
+            value={searchQuery}
+            placeholder={t('dashboard.panel-edit.placeholder-search-options', 'Search options')}
+            onChange={model.onSetSearchQuery}
+            autoFocus={true}
+            onBlur={() => {
+              if (searchQuery.length === 0) {
+                setIsSearchingOptions(false);
+              }
+            }}
+          />
+        </div>
       )}
-      {isVizPickerOpen && (
-        <PanelVizTypePicker
-          panel={panel}
-          onChange={model.onChangePanel}
-          onClose={model.onToggleVizPicker}
-          data={data}
-          showBackButton={config.featureToggles.newVizSuggestions ? hasPickedViz || !isNewPanel : true}
-          isNewPanel={isNewPanel}
-          hasPickedViz={hasPickedViz}
-        />
-      )}
+      {scrollableContent}
     </>
   );
+
+  if (isSidebarEnabled) {
+    return (
+      <VizOptionsSidebar activeSection={activeSection} onSectionChange={setActiveSection}>
+        {paneContent}
+      </VizOptionsSidebar>
+    );
+  }
+
+  return paneContent;
 }
 
 function getStyles(theme: GrafanaTheme2) {
