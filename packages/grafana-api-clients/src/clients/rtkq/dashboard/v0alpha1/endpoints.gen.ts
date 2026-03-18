@@ -255,6 +255,9 @@ const injectedRtkApi = api
             createdBy: queryArg.createdBy,
             explain: queryArg.explain,
             panelTitleSearch: queryArg.panelTitleSearch,
+            offset: queryArg.offset,
+            field: queryArg.field,
+            name: queryArg.name,
           },
         }),
         providesTags: ['Search'],
@@ -701,6 +704,12 @@ export type SearchDashboardsAndFoldersApiArg = {
   explain?: boolean;
   /** [experimental] optionally include matches from panel titles */
   panelTitleSearch?: boolean;
+  /** offset for pagination, used together with limit */
+  offset?: number;
+  /** additional fields to include in the response (e.g. sort field values) */
+  field?: string[];
+  /** filter results by resource name (k8s name, i.e. Grafana UID). When you pass multiple values, the filter matches any of them. */
+  name?: string[];
 };
 export type GetSortableFieldsApiResponse = /** status 200 undefined */ {
   /** APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources */

@@ -1,13 +1,27 @@
+import { configureStore } from '@reduxjs/toolkit';
+
+import { generatedAPI as dashboardAPI } from '@grafana/api-clients/rtkq/dashboard/v0alpha1';
 import { setBackendSrv } from '@grafana/runtime';
 import { getCustomSearchHandler } from '@grafana/test-utils/handlers';
 import server, { setupMockServer } from '@grafana/test-utils/server';
 import { backendSrv } from 'app/core/services/backend_srv';
+import { setStore } from 'app/store/store';
 
 import { GrafanaSearcher, SearchQuery } from './types';
 import { toDashboardResults, SearchHit, SearchAPIResponse, UnifiedSearcher } from './unified';
 
+// Set up a test store with the dashboard API reducer and middleware
+// so that dispatch() works for RTK Query endpoints.
+const testStore = configureStore({
+  reducer: {
+    [dashboardAPI.reducerPath]: dashboardAPI.reducer,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(dashboardAPI.middleware),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
+  testStore.dispatch(dashboardAPI.util.resetApiState());
 });
 
 const mockFallbackSearcher = {
@@ -15,6 +29,8 @@ const mockFallbackSearcher = {
 } as unknown as GrafanaSearcher;
 
 setBackendSrv(backendSrv);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+setStore(testStore as any);
 setupMockServer();
 
 describe('Unified Storage Searcher', () => {

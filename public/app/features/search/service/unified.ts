@@ -3,14 +3,16 @@ import { isEmpty } from 'lodash';
 import { generatedAPI as legacyUserAPI } from '@grafana/api-clients/internal/rtkq/legacy/user';
 import {
   API_GROUP as DASHBOARD_API_GROUP,
-  BASE_URL as v0alphaBaseURL,
+  DashboardHit,
+  generatedAPI as dashboardAPI,
   ManagedBy,
+  SearchDashboardsAndFoldersApiArg,
+  SearchResults,
 } from '@grafana/api-clients/rtkq/dashboard/v0alpha1';
 import { arrayToDataFrame, DataFrame, DataFrameView, getDisplayProcessor, SelectableValue } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { config, getBackendSrv } from '@grafana/runtime';
+import { config } from '@grafana/runtime';
 import { generatedAPI, ListStarsApiResponse } from 'app/api/clients/collections/v1alpha1';
-import { getAPIBaseURL } from 'app/api/utils';
 import { TermCount } from 'app/core/components/TagFilter/TagFilter';
 import { contextSrv } from 'app/core/services/context_srv';
 import kbn from 'app/core/utils/kbn';
@@ -31,8 +33,8 @@ import { appendFrame, filterSearchResults, replaceCurrentFolderQuery } from './u
 // and that it can not serve any search requests. We are temporarily using the old SQL Search API as a fallback when that happens.
 const loadingFrameName = 'Loading';
 
-const searchURI = `${v0alphaBaseURL}/search`;
-
+// SearchHit extends DashboardHit with computed frontend fields (location, url).
+// Used for the deleted dashboards flow which builds hits from a different API.
 export type SearchHit = {
   resource: string; // dashboards | folders
   name: string;
@@ -48,18 +50,8 @@ export type SearchHit = {
   managedBy?: ManagedBy;
 };
 
-export type SearchAPIResponse = {
-  totalHits: number;
-  hits: SearchHit[];
-  facets?: {
-    tags?: {
-      terms?: Array<{
-        term: string;
-        count: number;
-      }>;
-    };
-  };
-};
+// Re-export SearchResults as SearchAPIResponse for backward compatibility with test consumers.
+export type SearchAPIResponse = SearchResults;
 
 const folderViewSort = 'name_sort';
 
@@ -112,9 +104,18 @@ export class UnifiedSearcher implements GrafanaSearcher {
 
   async tags(query: SearchQuery): Promise<TermCount[]> {
     const qry = query.query ?? '*';
-    let uri = `${searchURI}?facet=tags&facetLimit=1000&query=${qry}&limit=1`;
-    const resp = await getBackendSrv().get<SearchAPIResponse>(uri);
-    return resp.facets?.tags?.terms || [];
+    const rsp: SearchResults = await dispatch(
+      dashboardAPI.endpoints.searchDashboardsAndFolders.initiate({
+        facet: ['tags'],
+        facetLimit: 1000,
+        query: qry,
+        limit: 1,
+      })
+    ).unwrap();
+    return (rsp.facets?.tags?.terms ?? []).map((t) => ({
+      term: t.term ?? '',
+      count: t.count ?? 0,
+    }));
   }
 
   async getLocationInfo() {
@@ -142,16 +143,16 @@ export class UnifiedSearcher implements GrafanaSearcher {
   }
 
   async doSearchQuery(query: SearchQuery): Promise<QueryResponse> {
-    const uri = await this.newRequest(query);
+    const params = await this.buildSearchParams(query);
 
-    let rsp: SearchAPIResponse;
+    let rsp: SearchResults;
 
     if (query.deleted) {
       const data = await deletedDashboardsCache.get();
       const results = filterSearchResults(data, query);
       rsp = { hits: results, totalHits: results.length };
     } else {
-      rsp = await this.fetchResponse(uri);
+      rsp = await this.fetchResponse(params);
     }
 
     const first = toDashboardResults(rsp, query.sort ?? '');
@@ -199,8 +200,7 @@ export class UnifiedSearcher implements GrafanaSearcher {
         if (offset >= meta.count) {
           return;
         }
-        const nextPageUrl = `${uri}&offset=${offset}`;
-        const resp = await this.fetchResponse(nextPageUrl);
+        const resp = await this.fetchResponse({ ...params, offset });
         const frame = toDashboardResults(resp, query.sort ?? '');
         if (!frame) {
           console.log('no results', frame);
@@ -248,9 +248,8 @@ export class UnifiedSearcher implements GrafanaSearcher {
     };
   }
 
-  async fetchResponse(uri: string) {
-    // TODO: use API client for this
-    const rsp = await getBackendSrv().get<SearchAPIResponse>(uri);
+  async fetchResponse(params: SearchDashboardsAndFoldersApiArg): Promise<SearchResults> {
+    const rsp: SearchResults = await dispatch(dashboardAPI.endpoints.searchDashboardsAndFolders.initiate(params)).unwrap();
 
     // we check the locationInfo staleness by whether we have all the folders info. This does not mean though
     // that we actually have the latest info about the folders (like changed labels). Also we will never actually
@@ -272,93 +271,84 @@ export class UnifiedSearcher implements GrafanaSearcher {
     const locationInfo = await this.locationInfo;
     const hits = rsp.hits.map((hit) => {
       if (hit.folder === undefined) {
-        return { ...hit, location: 'general', folder: 'general' };
+        return { ...hit, folder: 'general' };
       }
 
       // this means a user has permission to see this dashboard, but not the folder contents
       if (locationInfo[hit.folder] === undefined) {
-        return { ...hit, location: 'sharedwithme', folder: 'sharedwithme' };
+        return { ...hit, folder: 'sharedwithme' };
       }
 
       return hit;
     });
 
-    const totalHits = rsp.totalHits - (rsp.hits.length - hits.length);
-    return { ...rsp, hits, totalHits };
+    return { ...rsp, hits, totalHits: rsp.totalHits };
   }
 
-  async isFolderCacheStale(hits: SearchHit[]): Promise<boolean> {
+  async isFolderCacheStale(hits: DashboardHit[]): Promise<boolean> {
     const locationInfo = await this.locationInfo;
     return hits.some((hit) => {
       return hit.folder !== undefined && locationInfo[hit.folder] === undefined;
     });
   }
 
-  private async newRequest(query: SearchQuery): Promise<string> {
+  private async buildSearchParams(query: SearchQuery): Promise<SearchDashboardsAndFoldersApiArg> {
     query = await replaceCurrentFolderQuery(query);
 
-    let uri = searchURI;
-    uri += `?query=${encodeURIComponent(query.query ?? '*')}`;
-    uri += `&limit=${query.limit ?? pageSize}`;
+    const params: SearchDashboardsAndFoldersApiArg = {
+      query: query.query ?? '*',
+      limit: query.limit ?? pageSize,
+    };
 
     if (query.offset) {
-      uri += `&offset=${query.offset}`;
+      params.offset = query.offset;
     }
 
     if (!isEmpty(query.location)) {
-      uri += `&folder=${query.location}`;
-    }
-
-    if (query.kind) {
-      // filter resource types
-      uri += '&' + query.kind.map((kind) => `type=${kind}`).join('&');
+      params.folder = query.location;
     }
 
     if (query.ds_type?.length) {
-      uri += '&dataSourceType=' + query.ds_type;
+      params.dataSourceType = query.ds_type;
     }
 
     if (query.panel_type?.length) {
-      uri += '&panelType=' + query.panel_type;
+      params.panelType = query.panel_type;
     }
 
     if (query.createdBy?.length) {
-      uri += '&createdBy=' + encodeURIComponent(query.createdBy);
+      params.createdBy = query.createdBy;
     }
 
     if (query.panelTitleSearch) {
-      uri += '&panelTitleSearch=true';
+      params.panelTitleSearch = true;
     }
 
     if (query.tags?.length) {
-      uri += '&' + query.tags.map((tag) => `tag=${encodeURIComponent(tag)}`).join('&');
+      params.tags = query.tags;
     }
 
     if (query.sort) {
       const sort = query.sort.replace('_sort', '').replace('name', 'title');
-      uri += `&sort=${sort}`;
+      params.sort = sort;
       const sortField = sort.startsWith('-') ? sort.substring(1) : sort;
-
-      uri += `&field=${sortField}`; // we want to the sort field to be included in the response
+      params.field = [sortField]; // we want the sort field to be included in the response
     }
 
     if (query.name?.length) {
-      uri += '&' + query.name.map((name) => `name=${encodeURIComponent(name)}`).join('&');
+      params.name = query.name;
     }
 
     if (query.uid?.length) {
       // legacy support for filtering by dashboard uid
-      uri += '&' + query.uid.map((name) => `name=${encodeURIComponent(name)}`).join('&');
+      params.name = query.uid;
     }
 
     if (query.permission) {
-      uri += `&permission=${query.permission}`;
+      params.permission = query.permission;
     }
 
-    if (query.deleted) {
-      uri = `${getAPIBaseURL(DASHBOARD_API_GROUP, 'v1beta1')}/dashboards/?labelSelector=grafana.app/get-trash=true`;
-    }
-    return uri;
+    return params;
   }
 
   getFolderViewSort(): string {
@@ -399,7 +389,7 @@ function getSortFieldDisplayName(name: string) {
   return name;
 }
 
-export function toDashboardResults(rsp: SearchAPIResponse, sort: string): DataFrame {
+export function toDashboardResults(rsp: SearchResults, sort: string): DataFrame {
   const hits = rsp.hits;
   if (hits.length < 1) {
     return { fields: [], length: 0 };
@@ -415,12 +405,12 @@ export function toDashboardResults(rsp: SearchAPIResponse, sort: string): DataFr
       Object.entries(hit.field ?? {}).map(([key, value]) => [key, value == null ? '-' : value])
     );
 
+    // Sort tags so we aren't reliant on the backend having done this for us
+    // Sorting order can be different between APIs/search implementations
     return {
       ...hit,
       uid: hit.name,
       url: toURL(hit.resource, hit.name, hit.title),
-      // Sort tags so we aren't reliant on the backend having done this for us
-      // Sorting order can be different between APIs/search implementations
       tags: (hit.tags || []).sort(),
       folder: hit.folder || 'general',
       location,
@@ -449,35 +439,35 @@ export function toDashboardResults(rsp: SearchAPIResponse, sort: string): DataFr
 }
 
 async function loadLocationInfo(): Promise<Record<string, LocationInfo>> {
-  // TODO: use proper pagination and API client for search.
   // TODO: This tries to load all the folders upfront even though it may not be neccessary if user does not render all
   //  the search results.
-  const uri = `${searchURI}?type=folder&limit=100000`;
-  const rsp = getBackendSrv()
-    .get<SearchAPIResponse>(uri)
-    .then((rsp) => {
-      const locationInfo: Record<string, LocationInfo> = {
-        general: {
-          kind: 'folder',
-          name: 'Dashboards',
-          url: '/dashboards',
-        }, // share location info with everyone
-        sharedwithme: {
-          kind: 'sharedwithme',
-          name: 'Shared with me',
-          url: '',
-        },
-      };
-      for (const hit of rsp.hits) {
-        locationInfo[hit.name] = {
-          name: hit.title,
-          kind: 'folder',
-          url: toURL('folders', hit.name, hit.title),
-        };
-      }
-      return locationInfo;
-    });
-  return rsp;
+  const rsp: SearchResults = await dispatch(
+    dashboardAPI.endpoints.searchDashboardsAndFolders.initiate(
+      { type: 'folder', limit: 100000 },
+      { forceRefetch: true }
+    )
+  ).unwrap();
+
+  const locationInfo: Record<string, LocationInfo> = {
+    general: {
+      kind: 'folder',
+      name: 'Dashboards',
+      url: '/dashboards',
+    }, // share location info with everyone
+    sharedwithme: {
+      kind: 'sharedwithme',
+      name: 'Shared with me',
+      url: '',
+    },
+  };
+  for (const hit of rsp.hits) {
+    locationInfo[hit.name] = {
+      name: hit.title,
+      kind: 'folder',
+      url: toURL('folders', hit.name, hit.title),
+    };
+  }
+  return locationInfo;
 }
 
 function toURL(resource: string, name: string, title: string): string {

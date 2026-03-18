@@ -1678,6 +1678,37 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "offset for pagination, used together with limit",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "field",
+            "in": "query",
+            "description": "additional fields to include in the response (e.g. sort field values)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "filter results by resource name (k8s name, i.e. Grafana UID). When you pass multiple values, the filter matches any of them.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
