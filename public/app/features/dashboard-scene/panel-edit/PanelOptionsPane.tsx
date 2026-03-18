@@ -37,6 +37,7 @@ import { useScrollReflowLimit } from './useScrollReflowLimit';
 import { VizOptionsSidebar, VizSidebarSection } from './VizOptionsSidebar';
 import { VizAISection } from './VizAISection';
 import { StylesSection } from './VizStylesSection';
+import { VizOptionsRedesign } from './VizOptionsRedesign';
 
 export interface PanelOptionsPaneState extends SceneObjectState {
   isVizPickerOpen?: boolean;
@@ -201,6 +202,10 @@ function PanelOptionsPaneComponent({ model }: SceneComponentProps<PanelOptionsPa
             </ScrollContainer>
           );
         default: // 'options'
+          // Phase 4: use redesigned panel for timeseries/gauge
+          if (pluginId === 'timeseries' || pluginId === 'gauge') {
+            return <VizOptionsRedesign panel={panel} />;
+          }
           return (
             <ScrollContainer minHeight={isScrollingLayout ? 'max-content' : 0}>
               <PanelOptions
