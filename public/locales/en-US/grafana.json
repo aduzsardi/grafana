@@ -565,19 +565,13 @@
       "view-configuration": "View configuration"
     },
     "alertmanager-config": {
-      "confirmText-yes-reset-configuration": "Yes, reset configuration",
       "gma-manual-configuration-description": "The internal Grafana Alertmanager configuration cannot be manually changed. To change this configuration, edit the individual resources through the UI.",
       "gma-manual-configuration-is-not-supported": "Manual configuration changes not supported",
       "message": {
         "configuration-cannot-be-empty": "Configuration cannot be empty"
       },
-      "reset": "Reset",
-      "reset-confirmation": "Are you sure you want to reset configuration for \"{{alertmanagerName}}\"? Contact points and notification policies will be reset to their defaults.",
-      "resetting-configuration-might-while": "Resetting configuration, this might take a while.",
       "title-failed-to-load-alertmanager-configuration": "Failed to load Alertmanager configuration",
-      "title-oops-something-went-wrong": "Oops, something went wrong",
-      "title-reset-alertmanager-configuration": "Reset Alertmanager configuration",
-      "title-resetting-alertmanager-configuration": "Resetting Alertmanager configuration"
+      "title-oops-something-went-wrong": "Oops, something went wrong"
     },
     "alertmanager-configuration-version-manager": {
       "body-restore-configuration-version-unsaved-changes": "Are you sure you want to restore the configuration to this version? All unsaved changes will be lost.",
