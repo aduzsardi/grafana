@@ -18,17 +18,10 @@ import {
   setupVanillaAlertmanagerServer,
 } from './mocks/server';
 
-const renderConfiguration = (
-  alertManagerSourceName: string,
-  { onDismiss = jest.fn(), onSave = jest.fn() }
-) =>
+const renderConfiguration = (alertManagerSourceName: string, { onDismiss = jest.fn(), onSave = jest.fn() }) =>
   render(
     <AlertmanagerProvider accessType="instance">
-      <AlertmanagerConfig
-        alertmanagerName={alertManagerSourceName}
-        onDismiss={onDismiss}
-        onSave={onSave}
-      />
+      <AlertmanagerConfig alertmanagerName={alertManagerSourceName} onDismiss={onDismiss} onSave={onSave} />
     </AlertmanagerProvider>
   );
 
