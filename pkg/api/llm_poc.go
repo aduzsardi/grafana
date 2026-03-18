@@ -16,7 +16,7 @@ import (
 
 const anthropicAPIURL = "https://api.anthropic.com/v1/messages"
 const anthropicVersion = "2023-06-01"
-const anthropicModel = "claude-3-5-sonnet-20241022"
+const anthropicModel = "claude-sonnet-4-6"
 
 const llmSystemPrompt = `You are a Grafana panel configuration assistant.
 The user will describe a visualization change in plain English, along with the panel's current state.
