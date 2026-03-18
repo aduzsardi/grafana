@@ -291,6 +291,7 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
         }
       })
       .catch((error) => {
+        console.error('Search failed', error);
         reportSearchFailedQueryInteraction(this.state.eventTrackingNamespace, {
           ...trackingInfo,
           error: error?.message,
