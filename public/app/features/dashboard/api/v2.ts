@@ -15,6 +15,7 @@ import {
   ResourceClient,
   ResourceForCreate,
 } from 'app/features/apiserver/types';
+import { convertSpecToWireFormat } from 'app/features/dashboard-scene/serialization/transformationCompat';
 import { getDashboardUrl } from 'app/features/dashboard-scene/utils/getDashboardUrl';
 import { DeleteDashboardResponse } from 'app/features/manage-dashboards/types';
 import { buildSourceLink, removeExistingSourceLinks } from 'app/features/provisioning/utils/sourceLink';
@@ -110,7 +111,7 @@ export class K8sDashboardV2API
   }
 
   async saveDashboard(options: SaveDashboardCommand<DashboardV2Spec>): Promise<SaveDashboardResponseDTO> {
-    const dashboard = options.dashboard;
+    const dashboard = convertSpecToWireFormat(options.dashboard);
 
     const obj: ResourceForCreate<DashboardV2Spec> = {
       // the metadata will have the name that's the uid
