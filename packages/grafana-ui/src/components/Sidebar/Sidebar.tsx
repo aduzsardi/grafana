@@ -1,11 +1,13 @@
 import { css, cx } from '@emotion/css';
 import { ReactNode, useContext } from 'react';
+import { useMedia } from 'react-use';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
 import { t } from '@grafana/i18n';
 
 import { useStyles2, useTheme2 } from '../../themes/ThemeContext';
+import { IconButton } from '../IconButton/IconButton';
 import { getPortalContainer } from '../Portal/Portal';
 
 import { SidebarButton } from './SidebarButton';
@@ -22,7 +24,7 @@ export interface Props {
 export function SidebarComp({ children, contextValue }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
-  const { isDocked, position, tabsMode, hasOpenPane, edgeMargin, bottomMargin } = contextValue;
+  const { isDocked, position, tabsMode, hasOpenPane, edgeMargin, bottomMargin, onToggleIsHidden } = contextValue;
 
   const className = cx({
     [styles.container]: true,
@@ -44,6 +46,22 @@ export function SidebarComp({ children, contextValue }: Props) {
       contextValue.onClosePane?.();
     }
   });
+
+  if (contextValue.isHidden) {
+    return (
+      <SidebarContext.Provider value={contextValue}>
+        <IconButton
+          className={styles.showButton}
+          variant="secondary"
+          name={'arrow-to-right'}
+          tooltip={t('grafana-ui.sidebar.show', 'Show')}
+          tooltipPlacement={position === 'left' ? 'right' : 'left'}
+          onClick={onToggleIsHidden}
+          data-testid={selectors.components.Sidebar.showHideToggle}
+        />
+      </SidebarContext.Provider>
+    );
+  }
 
   return (
     <SidebarContext.Provider value={contextValue}>
@@ -69,6 +87,8 @@ export interface SiderbarToolbarProps {
 export function SiderbarToolbar({ children }: SiderbarToolbarProps) {
   const styles = useStyles2(getStyles);
   const context = useContext(SidebarContext);
+  const theme = useTheme2();
+  const isMobile = useMedia(`(max-width: ${theme.breakpoints.values.sm}px)`);
 
   if (!context) {
     throw new Error('Sidebar.Toolbar must be used within a Sidebar component');
@@ -78,12 +98,14 @@ export function SiderbarToolbar({ children }: SiderbarToolbarProps) {
     <div className={cx(styles.toolbar, context.compact && styles.toolbarIconsOnly)}>
       {children}
       <div className={styles.flexGrow} />
-      <SidebarButton
-        icon={'web-section-alt'}
-        onClick={context.onToggleDock}
-        title={context.isDocked ? t('grafana-ui.sidebar.undock', 'Undock') : t('grafana-ui.sidebar.dock', 'Dock')}
-        data-testid={selectors.components.Sidebar.dockToggle}
-      />
+      {!isMobile && (
+        <SidebarButton
+          icon={'web-section-alt'}
+          onClick={context.onToggleDock}
+          title={context.isDocked ? t('grafana-ui.sidebar.undock', 'Undock') : t('grafana-ui.sidebar.dock', 'Dock')}
+          data-testid={selectors.components.Sidebar.dockToggle}
+        />
+      )}
     </div>
   );
 }
@@ -161,7 +183,8 @@ export const getStyles = (theme: GrafanaTheme2) => {
       padding: theme.spacing(1, 0),
       flexGrow: 0,
       gap: theme.spacing(2),
-      overflow: 'hidden',
+      overflowX: 'hidden',
+      overflowY: 'auto',
       width: theme.spacing(SIDE_BAR_WIDTH_WITH_TEXT),
     }),
     toolbarIconsOnly: css({
@@ -186,6 +209,16 @@ export const getStyles = (theme: GrafanaTheme2) => {
     openPaneLeft: css({
       borderLeft: `1px solid ${theme.colors.border.weak}`,
     }),
+    showButton: css({
+      position: 'fixed',
+      right: theme.spacing(0.5),
+      top: '50%',
+      zIndex: theme.zIndex.navbarFixed,
+      transform: 'scaleX(-1)',
+      padding: theme.spacing(1),
+      backgroundColor: theme.colors.background.secondary,
+      border: `1px solid ${theme.colors.border.strong}`,
+    }),
   };
 };
 
@@ -197,4 +230,4 @@ export const Sidebar = Object.assign(SidebarComp, {
   PaneHeader: SidebarPaneHeader,
 });
 
-export { type SidebarPosition, type SidebarContextValue, useSidebar } from './useSidebar';
+export { useSidebar, type SidebarContextValue, type SidebarPosition } from './useSidebar';
