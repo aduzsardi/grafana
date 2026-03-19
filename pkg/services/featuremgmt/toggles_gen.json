@@ -3220,6 +3220,19 @@
     },
     {
       "metadata": {
+        "name": "lokiAlignedQuerySplitting",
+        "resourceVersion": "1773915389906",
+        "creationTimestamp": "2026-03-19T10:16:29Z"
+      },
+      "spec": {
+        "description": "Aligns query splitting chunks with UTC midnight",
+        "stage": "experimental",
+        "codeowner": "@grafana/observability-logs",
+        "expression": "false"
+      }
+    },
+    {
+      "metadata": {
         "name": "lokiExperimentalStreaming",
         "resourceVersion": "1771434338561",
         "creationTimestamp": "2023-06-19T10:03:51Z"
