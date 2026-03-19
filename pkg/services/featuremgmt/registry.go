@@ -2643,6 +2643,14 @@ var (
 			RequiresRestart: true,
 			Expression:      "false",
 		},
+		{
+			Name:         "variableDocsInfoLink",
+			Description:  "Show a clickable documentation link icon next to variable descriptions",
+			Stage:        FeatureStageExperimental,
+			FrontendOnly: true,
+			Owner:        grafanaDashboardsSquad,
+			Expression:   "false",
+		},
 	}
 )
 
