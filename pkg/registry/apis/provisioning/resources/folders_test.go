@@ -752,17 +752,21 @@ func TestEnsureFolderPathExist_MetadataTitle(t *testing.T) {
 func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 	ctx := context.Background()
 
-	managedFolder := func(name, title, managerIdentity string) *unstructured.Unstructured {
+	managedFolder := func(name, title, managerIdentity, sourcePath string) *unstructured.Unstructured {
+		annotations := map[string]interface{}{
+			"grafana.app/managerId": managerIdentity,
+		}
+		if sourcePath != "" {
+			annotations["grafana.app/sourcePath"] = sourcePath
+		}
 		return &unstructured.Unstructured{
 			Object: map[string]interface{}{
 				"apiVersion": "folder.grafana.app/v1beta1",
 				"kind":       "Folder",
 				"metadata": map[string]interface{}{
-					"name":      name,
-					"namespace": "default",
-					"annotations": map[string]interface{}{
-						"grafana.app/managerId": managerIdentity,
-					},
+					"name":        name,
+					"namespace":   "default",
+					"annotations": annotations,
 				},
 				"spec": map[string]interface{}{
 					"title": title,
@@ -784,7 +788,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 		var updatedObj *unstructured.Unstructured
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Old Title", config.Name), nil
+				return managedFolder(name, "Old Title", config.Name, "my-folder"), nil
 			},
 			updateFn: func(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				updatedObj = obj.DeepCopy()
@@ -815,7 +819,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Same Title", config.Name), nil
+				return managedFolder(name, "Same Title", config.Name, "my-folder"), nil
 			},
 		}
 
@@ -866,7 +870,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
 				if name == "parent-uid" {
-					return managedFolder(name, "Old Parent Title", config.Name), nil
+					return managedFolder(name, "Old Parent Title", config.Name, "parent"), nil
 				}
 				return nil, apierrors.NewNotFound(schema.GroupResource{Group: "folder.grafana.app", Resource: "folders"}, name)
 			},
@@ -927,10 +931,11 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 				Hash: "same-hash",
 			}, nil)
 
-		// Folder IS in tree with matching hash — returns early.
+		// Folder IS in tree with matching state (title, path, hash) — returns early.
 		tree := NewEmptyFolderTree()
 		f := ParseFolder("my-folder/", config.Name)
 		f.ID = "stable-uid"
+		f.Title = "Same Title"
 		f.MetadataHash = "same-hash"
 		tree.Add(f, "")
 
@@ -964,7 +969,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 		var updatedObj *unstructured.Unstructured
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Old Title", config.Name), nil
+				return managedFolder(name, "Old Title", config.Name, "my-folder"), nil
 			},
 			updateFn: func(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				updatedObj = obj
@@ -1001,7 +1006,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Same Title", config.Name), nil
+				return managedFolder(name, "Same Title", config.Name, "my-folder"), nil
 			},
 			updateFn: func(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				return obj, nil
@@ -1028,7 +1033,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Old Title", config.Name), nil
+				return managedFolder(name, "Old Title", config.Name, "my-folder"), nil
 			},
 			updateFn: func(_ *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				return nil, fmt.Errorf("conflict")
@@ -1058,7 +1063,7 @@ func TestEnsureFolderPathExist_ReconcileTitle(t *testing.T) {
 
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolder(name, "Old Parent Title", config.Name), nil
+				return managedFolder(name, "Old Parent Title", config.Name, "parent"), nil
 			},
 			updateFn: func(_ *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				return nil, fmt.Errorf("conflict")
@@ -1154,7 +1159,7 @@ func TestEnsureFolderExists_MetadataHashUpdate(t *testing.T) {
 		require.Equal(t, "Same Title", title)
 	})
 
-	t.Run("preserves existing source path when updating checksum", func(t *testing.T) {
+	t.Run("updates source path and checksum when both differ", func(t *testing.T) {
 		config := newTestRepoConfig("test-repo")
 		rw := repository.NewMockReaderWriter(t)
 		rw.On("Config").Return(config)
@@ -1183,9 +1188,8 @@ func TestEnsureFolderExists_MetadataHashUpdate(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, updatedObj)
 
-		// Verify existing sourcePath is preserved, not overwritten with folder.Path
 		sourcePath, _, _ := unstructured.NestedString(updatedObj.Object, "metadata", "annotations", "grafana.app/sourcePath")
-		require.Equal(t, "original/path", sourcePath, "existing sourcePath should be preserved")
+		require.Equal(t, "my-folder", sourcePath, "sourcePath should be updated to the new path")
 
 		checksum, _, _ := unstructured.NestedString(updatedObj.Object, "metadata", "annotations", "grafana.app/sourceChecksum")
 		require.Equal(t, "new-hash", checksum)
@@ -1263,12 +1267,15 @@ func TestEnsureFolderExists_ParentUpdate(t *testing.T) {
 		}
 	}
 
-	managedFolderWithParent := func(name, title, managerIdentity, parent string) *unstructured.Unstructured {
+	managedFolderWithParent := func(name, title, managerIdentity, parent, sourcePath string) *unstructured.Unstructured {
 		annotations := map[string]interface{}{
 			"grafana.app/managerId": managerIdentity,
 		}
 		if parent != "" {
 			annotations["grafana.app/folder"] = parent
+		}
+		if sourcePath != "" {
+			annotations["grafana.app/sourcePath"] = sourcePath
 		}
 		return &unstructured.Unstructured{
 			Object: map[string]interface{}{
@@ -1296,7 +1303,7 @@ func TestEnsureFolderExists_ParentUpdate(t *testing.T) {
 		var updatedObj *unstructured.Unstructured
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolderWithParent(name, "Same Title", config.Name, "old-parent-uid"), nil
+				return managedFolderWithParent(name, "Same Title", config.Name, "old-parent-uid", "my-folder"), nil
 			},
 			updateFn: func(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				updatedObj = obj
@@ -1329,7 +1336,7 @@ func TestEnsureFolderExists_ParentUpdate(t *testing.T) {
 
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolderWithParent(name, "Same Title", config.Name, "same-parent"), nil
+				return managedFolderWithParent(name, "Same Title", config.Name, "same-parent", "my-folder"), nil
 			},
 		}
 
@@ -1355,7 +1362,7 @@ func TestEnsureFolderExists_ParentUpdate(t *testing.T) {
 		var updatedObj *unstructured.Unstructured
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
-				return managedFolderWithParent(name, "Same Title", config.Name, "some-parent"), nil
+				return managedFolderWithParent(name, "Same Title", config.Name, "some-parent", "my-folder"), nil
 			},
 			updateFn: func(obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 				updatedObj = obj
@@ -1389,7 +1396,7 @@ func TestEnsureFolderExists_ParentUpdate(t *testing.T) {
 		client := &fakeDynamicResourceClient{
 			getFn: func(name string) (*unstructured.Unstructured, error) {
 				// Existing folder also has no parent (root)
-				return managedFolderWithParent(name, "Same Title", config.Name, ""), nil
+				return managedFolderWithParent(name, "Same Title", config.Name, "", "my-folder"), nil
 			},
 		}
 
