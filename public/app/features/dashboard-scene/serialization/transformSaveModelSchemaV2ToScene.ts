@@ -365,7 +365,7 @@ export function createSceneVariableFromVariableModel(variable: TypedVariableMode
       supportsMultiValueOperators: Boolean(
         getDataSourceSrv().getInstanceSettings({ type: ds?.type })?.meta.multiValueFilterOperators
       ),
-      collapsible: config.featureToggles.dashboardAdHocAndGroupByWrapper,
+      collapsible: true,
     };
     if (variable.spec.allowCustomValue !== undefined) {
       adhocVariableState.allowCustomValue = variable.spec.allowCustomValue;

@@ -178,7 +178,7 @@ export function createSceneVariableFromVariableModel(variable: TypedVariableMode
       useQueriesAsFilterForOptions: true,
       drilldownRecommendationsEnabled: config.featureToggles.drilldownRecommendations,
       layout: 'combobox',
-      collapsible: config.featureToggles.dashboardAdHocAndGroupByWrapper,
+      collapsible: true,
       supportsMultiValueOperators: Boolean(
         getDataSourceSrv().getInstanceSettings({ type: variable.datasource?.type })?.meta.multiValueFilterOperators
       ),
