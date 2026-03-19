@@ -16,26 +16,45 @@ import (
 	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/middleware/requestmeta"
 	ac "github.com/grafana/grafana/pkg/services/accesscontrol"
+	"github.com/grafana/grafana/pkg/services/apiserver"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
+	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/user"
 )
 
 var tracer = otel.Tracer("github.com/grafana/grafana/pkg/services/accesscontrol/api")
 
-func NewAccessControlAPI(router routing.RouteRegister, accesscontrol ac.AccessControl, service ac.Service, userSvc user.Service) *AccessControlAPI {
-	return &AccessControlAPI{
-		RouteRegister: router,
-		Service:       service,
-		userSvc:       userSvc,
-		AccessControl: accesscontrol,
+func NewAccessControlAPI(
+	router routing.RouteRegister,
+	accesscontrol ac.AccessControl,
+	service ac.Service,
+	userSvc user.Service,
+	features featuremgmt.FeatureToggles,
+	restConfigProvider apiserver.RestConfigProvider,
+	actionResolver ac.ActionResolver,
+) *AccessControlAPI {
+	api := &AccessControlAPI{
+		RouteRegister:      router,
+		Service:            service,
+		userSvc:            userSvc,
+		AccessControl:      accesscontrol,
+		features:           features,
+		restConfigProvider: restConfigProvider,
 	}
+
+	api.k8sResolver = newK8sPermissionResolver(restConfigProvider, userSvc, actionResolver)
+
+	return api
 }
 
 type AccessControlAPI struct {
-	Service       ac.Service
-	AccessControl ac.AccessControl
-	RouteRegister routing.RouteRegister
-	userSvc       user.Service
+	Service            ac.Service
+	AccessControl      ac.AccessControl
+	RouteRegister      routing.RouteRegister
+	userSvc            user.Service
+	features           featuremgmt.FeatureToggles
+	restConfigProvider apiserver.RestConfigProvider
+	k8sResolver        *k8sPermissionResolver
 }
 
 func (api *AccessControlAPI) RegisterAPIEndpoints() {
@@ -110,7 +129,20 @@ func (api *AccessControlAPI) searchUsersPermissions(c *contextmodel.ReqContext) 
 		return response.JSON(http.StatusBadRequest, "at least one search option must be provided")
 	}
 
-	// Compute metadata
+	// Use K8s path when FlagKubernetesAuthzRolesAndRoleBindingsRedirect is enabled
+	if api.features != nil && api.features.IsEnabled(ctx, featuremgmt.FlagKubernetesAuthzRolesAndRoleBindingsRedirect) && api.k8sResolver != nil {
+		k8sResult, err := api.k8sResolver.SearchUsersPermissions(ctx, c.Namespace, c, searchOptions)
+		if err != nil {
+			return response.Error(http.StatusInternalServerError, "could not get user permissions from k8s", err)
+		}
+		permsByAction := map[int64]map[string][]string{}
+		for userID, userPerms := range k8sResult {
+			permsByAction[userID] = ac.Reduce(userPerms)
+		}
+		return response.JSON(http.StatusOK, permsByAction)
+	}
+
+	// Legacy SQL-based path
 	permissions, err := api.Service.SearchUsersPermissions(ctx, c.SignedInUser, searchOptions)
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, "could not get org user permissions", err)
