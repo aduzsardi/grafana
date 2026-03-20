@@ -1841,7 +1841,7 @@
       },
       "history-error": "Gagal memuat riwayat status",
       "history-error-desc": "Tidak dapat mengambil riwayat transisi status untuk instans ini.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Tidak ada perubahan status terbaru",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1853,6 +1853,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1860,15 +1862,14 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Label yang tidak cocok",
@@ -3472,7 +3473,9 @@
       "error-loading-rule": "Terjadi kesalahan saat memuat aturan",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Detail instans"
+        "declare-incident": "",
+        "instance-details": "Detail instans",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Anda tidak memiliki instans peringatan dalam status aktif atau tertunda untuk rentang waktu yang dipilih.",
       "no-instances-found": "Tidak ada instans peringatan yang ditemukan untuk aturan: {{ruleUID}}",
@@ -5188,6 +5191,12 @@
       "ungroup-rows": "Pisahkan baris",
       "ungroup-tabs": "Pisah grup tab"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6069,6 +6078,13 @@
       "save-json-to-file": "Simpan JSON ke file",
       "see-docs": "Lihat <2>dokumentasi</2> untuk informasi selengkapnya tentang penyediaan."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": "Tidak ada panel yang cocok"
     },
@@ -6083,6 +6099,10 @@
       "dashboard-options": {
         "title": "Opsi",
         "tooltip": "Opsi dasbor"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Ekspor"
@@ -6426,11 +6446,14 @@
     "browse-plugins": "Telusuri plugin",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Sumber data disediakan",
       "details-tooltip": "Detail",
       "no-preview": "",
-      "use-dashboard-button": "Gunakan dasbor",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Tidak ada dasbor komunitas yang ditemukan",
     "community-empty-title-with-datasource": "Tidak ada dasbor {{datasourceType}} komunitas yang ditemukan",
@@ -7544,6 +7567,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "Anda juga dapat mengambil bundel dukungan yang berisi informasi mengenai instans Grafana Anda dan sumber data yang dikonfigurasi di bagian <1>bundel dukungan</1>."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Anotasi"
@@ -7574,6 +7602,8 @@
     },
     "json-editor": {
       "save-button": "Simpan perubahan",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "Model JSON di bawah ini adalah struktur data yang menentukan dasbor. Ini termasuk pengaturan dasbor, pengaturan panel, tata letak, kueri, dan sebagainya.",
       "title": "Model JSON"
     },

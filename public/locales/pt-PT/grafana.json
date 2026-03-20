@@ -1849,7 +1849,7 @@
       },
       "history-error": "Falha ao carregar o histórico do estado",
       "history-error-desc": "Não foi possível obter o histórico de transição de estado para esta instância.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Sem alterações de estado recentes",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1861,6 +1861,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1868,17 +1870,15 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_one": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_one": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_one": "",
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Etiquetas não correspondentes",
@@ -3492,7 +3492,9 @@
       "error-loading-rule": "Erro ao carregar a regra",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Detalhes da instância"
+        "declare-incident": "",
+        "instance-details": "Detalhes da instância",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Não tem instâncias de alerta num estado de disparo ou pendente para o intervalo de tempo selecionado.",
       "no-instances-found": "Nenhuma instância de alerta encontrada para a regra: {{ruleUID}}",
@@ -5220,6 +5222,12 @@
       "ungroup-rows": "Desagrupar linhas",
       "ungroup-tabs": "Desagrupar separadores"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6102,6 +6110,13 @@
       "save-json-to-file": "Guardar JSON no ficheiro",
       "see-docs": "Consulte a <2>documentação</2> para obter mais informações sobre aprovisionamento."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6116,6 +6131,10 @@
       "dashboard-options": {
         "title": "Opções",
         "tooltip": "Opções do painel de controlo"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Exportar"
@@ -6459,11 +6478,14 @@
     "browse-plugins": "Procurar plugins",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Origem de dados fornecida",
       "details-tooltip": "Detalhes",
       "no-preview": "",
-      "use-dashboard-button": "Utilizar painel de controlo",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Nenhum painel de controlo da comunidade encontrado",
     "community-empty-title-with-datasource": "Nenhum painel de controlo {{datasourceType}} da comunidade encontrado",
@@ -7589,6 +7611,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "Também pode recuperar um pacote de suporte que contém informações sobre a sua instância da Grafana e origens de dados configuradas na <1>secção de pacotes de suporte</1>."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Anotações"
@@ -7619,6 +7646,8 @@
     },
     "json-editor": {
       "save-button": "Guardar alterações",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "O modelo JSON abaixo é a estrutura de dados que define o painel de controlo. Isto inclui definições do painel de controlo, definições do painel, layout, consultas, etc.",
       "title": "Modelo JSON"
     },

@@ -1841,7 +1841,7 @@
       },
       "history-error": "状態履歴の読み込みに失敗しました",
       "history-error-desc": "このインスタンスの状態遷移履歴を取得できません。",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "最近の状態変更はありません",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1853,6 +1853,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1860,15 +1862,14 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "一致しないラベル",
@@ -3472,7 +3473,9 @@
       "error-loading-rule": "ルールの読み込みエラー",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "インスタンスの詳細"
+        "declare-incident": "",
+        "instance-details": "インスタンスの詳細",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "選択した時間範囲に、発生中または保留状態のアラートインスタンスはありません。",
       "no-instances-found": "ルールに対するアラートインスタンスが見つかりません：{{ruleUID}}",
@@ -5188,6 +5191,12 @@
       "ungroup-rows": "行のグループ化を解除",
       "ungroup-tabs": "タブのグループ化を解除"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6069,6 +6078,13 @@
       "save-json-to-file": "JSONをファイルに保存",
       "see-docs": "プロビジョニングについての詳細は<2>ドキュメント</2>をご覧ください。"
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6083,6 +6099,10 @@
       "dashboard-options": {
         "title": "オプション",
         "tooltip": "ダッシュボードオプション"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "エクスポート"
@@ -6426,11 +6446,14 @@
     "browse-plugins": "プラグインを参照",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "データソースが提供されました",
       "details-tooltip": "詳細",
       "no-preview": "",
-      "use-dashboard-button": "ダッシュボードを使用",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "コミュニティダッシュボードが見つかりません",
     "community-empty-title-with-datasource": "{{datasourceType}}コミュニティダッシュボードが見つかりません",
@@ -7544,6 +7567,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "<1>サポートバンドルセクション</1>で、Grafanaインスタンスと構成されたデータソースに関する情報を含むサポートバンドルを取得することもできます。"
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "注釈"
@@ -7574,6 +7602,8 @@
     },
     "json-editor": {
       "save-button": "変更を保存",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "以下のJSONモデルは、ダッシュボードを定義するデータ構造です。これには、ダッシュボード設定、パネル設定、レイアウト、クエリなどが含まれます。",
       "title": "JSONモデル"
     },

@@ -1849,7 +1849,7 @@
       },
       "history-error": "Az állapotelőzmények betöltése nem sikerült",
       "history-error-desc": "Nem sikerült lekérni az állapotátmeneti előzményeket ehhez a példányhoz.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Nincsenek friss állapotváltozások",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1861,6 +1861,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1868,17 +1870,15 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_one": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_one": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_one": "",
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Nem egyező címkék",
@@ -3492,7 +3492,9 @@
       "error-loading-rule": "Hiba történt a szabály betöltésekor",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Példány részletei"
+        "declare-incident": "",
+        "instance-details": "Példány részletei",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Nincsenek aktív vagy függő állapotú riasztáspéldányok a kiválasztott időtartományban.",
       "no-instances-found": "Nem találhatók riasztáspéldányok ehhez a szabályhoz: {{ruleUID}}",
@@ -5220,6 +5222,12 @@
       "ungroup-rows": "Sorok csoportosításának megszüntetése",
       "ungroup-tabs": "Lapok csoportosításának megszüntetése"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6102,6 +6110,13 @@
       "save-json-to-file": "JSON mentése fájlba",
       "see-docs": "A kiépítéssel kapcsolatos további információkért tekintse meg a <2>dokumentációt</2>."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6116,6 +6131,10 @@
       "dashboard-options": {
         "title": "Beállítások",
         "tooltip": "Irányítópult beállításai"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Exportálás"
@@ -6459,11 +6478,14 @@
     "browse-plugins": "Bővítmények tallózása",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Adatforrás biztosítva",
       "details-tooltip": "Részletek",
       "no-preview": "",
-      "use-dashboard-button": "Irányítópult használata",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Nem található közösségi irányítópult",
     "community-empty-title-with-datasource": "Nem található {{datasourceType}} típusú közösségi irányítópult",
@@ -7589,6 +7611,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "A < 1 >támogatási csomagokról szóló részben</1> a Grafana-példányra és a konfigurált adatforrásokra vonatkozó információkat tartalmazó támogatási csomagot is lekérheti."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Jegyzetek"
@@ -7619,6 +7646,8 @@
     },
     "json-editor": {
       "save-button": "Beállítások mentése",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "Az alábbi JSON-modell az irányítópultot meghatározó adatszerkezet. Ez magában foglalja az irányítópult beállításait, a panel beállításait, az elrendezést, a lekérdezéseket és így tovább.",
       "title": "JSON-modell"
     },

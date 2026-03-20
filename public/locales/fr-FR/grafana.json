@@ -1849,7 +1849,7 @@
       },
       "history-error": "Échec du chargement de l’historique des états",
       "history-error-desc": "Impossible de récupérer l’historique des transitions d’état pour cette instance.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Aucun changement d’état récent",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1861,6 +1861,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1868,17 +1870,15 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_one": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_one": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_one": "",
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Étiquettes non correspondantes",
@@ -3492,7 +3492,9 @@
       "error-loading-rule": "Erreur lors du chargement de la règle",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Détails de l’instance"
+        "declare-incident": "",
+        "instance-details": "Détails de l’instance",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Vous n’avez aucune instance d’alerte déclenchée ou en attente pour la plage temporelle sélectionnée.",
       "no-instances-found": "Aucune instance d’alerte trouvée pour la règle : {{ruleUID}}",
@@ -5220,6 +5222,12 @@
       "ungroup-rows": "Dissocier les lignes",
       "ungroup-tabs": "Dissocier les onglets"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6102,6 +6110,13 @@
       "save-json-to-file": "Enregistrer le fichier JSON",
       "see-docs": "Consultez la <2>documentation</2> pour en savoir plus sur la mise en service."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6116,6 +6131,10 @@
       "dashboard-options": {
         "title": "Options",
         "tooltip": "Options du tableau de bord"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Exporter"
@@ -6459,11 +6478,14 @@
     "browse-plugins": "Parcourir les plugins",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Source de données fournie",
       "details-tooltip": "Détails",
       "no-preview": "",
-      "use-dashboard-button": "Utiliser le tableau de bord",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Aucun tableau de bord communautaire trouvé",
     "community-empty-title-with-datasource": "Aucun tableau de bord communautaire trouvé pour {{datasourceType}}",
@@ -7589,6 +7611,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "Vous pouvez également récupérer un ensemble d'outils d'assistance contenant des informations concernant votre instance Grafana et les sources de données configurées dans la <1>section des ensembles d'outils d'assistance</1>."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Annotations"
@@ -7619,6 +7646,8 @@
     },
     "json-editor": {
       "save-button": "Enregistrer les modifications",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "Le modèle JSON ci-dessous est la structure de données qui définit le tableau de bord. Il inclut les paramètres du tableau de bord, les paramètres du panneau, la mise en page, les requêtes, etc.",
       "title": "Modèle JSON"
     },

@@ -1849,7 +1849,7 @@
       },
       "history-error": "Impossibile caricare la cronologia dello stato",
       "history-error-desc": "Impossibile recuperare la cronologia delle transizioni di stato per questa istanza.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Nessuna modifica recente dello stato",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1861,6 +1861,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1868,17 +1870,15 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_one": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_one": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_one": "",
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Etichette non corrispondenti",
@@ -3492,7 +3492,9 @@
       "error-loading-rule": "Errore durante il caricamento della regola",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Dettagli dell'istanza"
+        "declare-incident": "",
+        "instance-details": "Dettagli dell'istanza",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Non sono presenti istanze di avviso in stato di attivazione o in sospeso per l'intervallo di tempo selezionato.",
       "no-instances-found": "Nessuna istanza di avviso trovata per la regola: {{ruleUID}}",
@@ -5220,6 +5222,12 @@
       "ungroup-rows": "Annulla raggruppamento righe",
       "ungroup-tabs": "Annulla raggruppamento schede"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6102,6 +6110,13 @@
       "save-json-to-file": "Salva JSON nel file",
       "see-docs": "Consulta la <2>documentazione</2> per ulteriori informazioni sul provisioning."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6116,6 +6131,10 @@
       "dashboard-options": {
         "title": "Opzioni",
         "tooltip": "Opzioni della dashboard"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Esporta"
@@ -6459,11 +6478,14 @@
     "browse-plugins": "Scopri i plug-in",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Origine dei dati fornita",
       "details-tooltip": "Dettagli",
       "no-preview": "",
-      "use-dashboard-button": "Usa dashboard",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Nessuna dashboard della community trovata",
     "community-empty-title-with-datasource": "Nessuna dashboard della community {{datasourceType}} trovata",
@@ -7589,6 +7611,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "Puoi anche recuperare un pacchetto di supporto contenente informazioni sulla tua istanza di Grafana e sulle origini dati configurate nella <1>sezione dei pacchetti di supporto</1>."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Annotazioni"
@@ -7619,6 +7646,8 @@
     },
     "json-editor": {
       "save-button": "Salva modifiche",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "Il modello JSON riportato di seguito è la struttura dati che definisce il dashboard. Ciò include le impostazioni del dashboard, le impostazioni del pannello, il layout, le query e così via.",
       "title": "Modello JSON"
     },

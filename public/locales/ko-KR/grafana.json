@@ -1841,7 +1841,7 @@
       },
       "history-error": "상태 이력 불러오기 실패",
       "history-error-desc": "해당 인스턴스의 상태 전환 이력을 불러오지 못했습니다.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "최근 상태 변경 없음",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1853,6 +1853,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1860,15 +1862,14 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "일치하지 않는 레이블",
@@ -3472,7 +3473,9 @@
       "error-loading-rule": "규칙 로딩 중 오류 발생",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "인스턴스 세부 정보"
+        "declare-incident": "",
+        "instance-details": "인스턴스 세부 정보",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "선택한 시간 범위에서 발생 또는 보류 중인 알림 인스턴스가 없습니다.",
       "no-instances-found": "규칙에 대한 알림 인스턴스를 찾을 수 없음: {{ruleUID}}",
@@ -5188,6 +5191,12 @@
       "ungroup-rows": "행 그룹 해제",
       "ungroup-tabs": "탭 그룹 해제"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6069,6 +6078,13 @@
       "save-json-to-file": "JSON을 파일에 저장",
       "see-docs": "프로비저닝에 대한 자세한 내용은 <2>문서</2>를 참고하세요."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6083,6 +6099,10 @@
       "dashboard-options": {
         "title": "옵션",
         "tooltip": "대시보드 옵션"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "내보내기"
@@ -6426,11 +6446,14 @@
     "browse-plugins": "플러그인 찾아보기",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "데이터 소스 제공됨",
       "details-tooltip": "세부 정보",
       "no-preview": "",
-      "use-dashboard-button": "대시보드 사용",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "커뮤니티 대시보드를 찾을 수 없습니다",
     "community-empty-title-with-datasource": "{{datasourceType}} 커뮤니티 대시보드를 찾을 수 없습니다",
@@ -7544,6 +7567,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "<1>지원 번들 섹션</1>에서 Grafana 인스턴스 및 구성된 데이터 소스에 대한 정보가 포함된 지원 번들을 검색할 수도 있습니다."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "주석"
@@ -7574,6 +7602,8 @@
     },
     "json-editor": {
       "save-button": "변경 사항 저장",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "아래의 JSON 모델은 대시보드를 정의하는 데이터 구조입니다. 여기에는 대시보드 설정, 패널 설정, 레이아웃, 쿼리 등이 포함됩니다.",
       "title": "JSON 모델"
     },

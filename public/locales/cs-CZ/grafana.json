@@ -1865,7 +1865,7 @@
       },
       "history-error": "Nepodařilo se načíst historii stavu",
       "history-error-desc": "Nelze načíst historii přechodu stavu pro tuto instanci.",
-      "instance-timeline": "",
+      "instance-history-heading": "",
       "no-history": "Žádné nedávné změny stavu",
       "notifications-error": "",
       "notifications-error-desc": "",
@@ -1877,6 +1877,8 @@
       "timeline-all-failed": "",
       "timeline-all-failed-plural": "",
       "timeline-delivered": "",
+      "timeline-dot-all-failed": "",
+      "timeline-dot-some-failed": "",
       "timeline-empty": "",
       "timeline-failed": "",
       "timeline-filter-all": "",
@@ -1884,21 +1886,17 @@
       "timeline-filter-notifications": "",
       "timeline-filter-states": "",
       "timeline-loading": "",
-      "timeline-mixed-outcome": "",
-      "timeline-one-notification": "",
+      "timeline-notification-label": "",
+      "timeline-partial-failure": "",
       "timeline-status-firing": "",
       "timeline-status-resolved": "",
       "timeline-toggle-notifications": "",
       "view-notification-detail": "",
       "view-notification-tooltip": "",
-      "timeline-n-notifications_one": "",
-      "timeline-n-notifications_few": "",
-      "timeline-n-notifications_many": "",
-      "timeline-n-notifications_other": "",
-      "timeline-n-receivers_one": "",
-      "timeline-n-receivers_few": "",
-      "timeline-n-receivers_many": "",
-      "timeline-n-receivers_other": ""
+      "timeline-n-uniqueReceivers_one": "",
+      "timeline-n-uniqueReceivers_few": "",
+      "timeline-n-uniqueReceivers_many": "",
+      "timeline-n-uniqueReceivers_other": ""
     },
     "instance-match": {
       "non-matching-labels": "Neshodné štítky",
@@ -3532,7 +3530,9 @@
       "error-loading-rule": "Chyba při načítání pravidla",
       "high-activity-labels": "",
       "instance-details-drawer": {
-        "instance-details": "Podrobnosti o instanci"
+        "declare-incident": "",
+        "instance-details": "Podrobnosti o instanci",
+        "silence-button": ""
       },
       "no-firing-or-pending-instances": "Pro vybraný časový rozsah nemáte žádné výskyty výstrah ve stavu spuštění nebo čekání.",
       "no-instances-found": "Nebyly nalezeny žádné instance výstrah pro pravidlo: {{ruleUID}}",
@@ -5284,6 +5284,12 @@
       "ungroup-rows": "Zrušit seskupení řádků",
       "ungroup-tabs": "Zrušit seskupení karet"
     },
+    "code-pane": {
+      "collapse": "",
+      "expand": "",
+      "header": "",
+      "modal-title": ""
+    },
     "conditional-rendering": {
       "conditions": {
         "data": {
@@ -6168,6 +6174,13 @@
       "save-json-to-file": "Uložit JSON do souboru",
       "see-docs": "Další informace o zajištění najdete v <2>dokumentaci</2>."
     },
+    "schema-editor": {
+      "apply-button": "",
+      "apply-button-disabled-tooltip": "",
+      "apply-button-disabled-tooltip-yaml": "",
+      "apply-error-title": "",
+      "undo-title": ""
+    },
     "search-panel": {
       "no-match": ""
     },
@@ -6182,6 +6195,10 @@
       "dashboard-options": {
         "title": "Možnosti",
         "tooltip": "Možnosti nástěnky"
+      },
+      "edit-schema": {
+        "title": "",
+        "tooltip": ""
       },
       "export": {
         "title": "Exportovat"
@@ -6525,11 +6542,14 @@
     "browse-plugins": "Procházet pluginy",
     "card": {
       "customize-with-assistant-button": "",
+      "customize-with-assistant-button-label": "",
       "datasource-provided-badge": "Zdroj dat poskytnut",
       "details-tooltip": "Podrobnosti",
       "no-preview": "",
-      "use-dashboard-button": "Použít nástěnku",
-      "view-template-button": ""
+      "view-dashboard-button": "",
+      "view-dashboard-button-label": "",
+      "view-template-button": "",
+      "view-template-button-label": ""
     },
     "community-empty-title": "Nebyly nalezeny žádné komunitní nástěnky",
     "community-empty-title-with-datasource": "Nebyly nalezeny žádné komunitní nástěnky {{datasourceType}}",
@@ -7679,6 +7699,11 @@
   "dashboard-scene-help-wizard": {
     "support-bundle": "Balíček podpory obsahující informace ohledně vaší instance Grafana a nakonfigurovaných zdrojů dat můžete také získat v části <1>Balíčky podpory</1>."
   },
+  "dashboard-schema-editor": {
+    "format-label": "",
+    "json-disabled-tooltip": "",
+    "yaml-disabled-tooltip": ""
+  },
   "dashboard-settings": {
     "annotations": {
       "title": "Vysvětlivky"
@@ -7709,6 +7734,8 @@
     },
     "json-editor": {
       "save-button": "Uložit změny",
+      "save-button-disabled-tooltip": "",
+      "save-button-disabled-tooltip-yaml": "",
       "subtitle": "Model JSON dole je datová struktura, která definuje nástěnku. Patří sem nastavení nástěnky, nastavení panelu, rozvržení, dotazy atd.",
       "title": "Model JSON"
     },
